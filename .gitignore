@@ -1,0 +1,21 @@
+﻿# Ignore compiled executables and installers
+*.exe
+*.msi
+*.dll
+
+# Ignore Python virtual environments
+venv/
+.venv/
+env/
+__pycache__/
+*.py[cod]
+*.class
+
+# Ignore media files
+*.mp4
+*.wav
+*.mp3
+
+# Ignore build directories
+build/
+dist/

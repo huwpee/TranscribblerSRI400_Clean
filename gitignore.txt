@@ -1,0 +1,25 @@
+# Ignore compiled executables and installers
+*.exe
+*.msi
+*.dll
+
+# Ignore Python virtual environments
+venv/
+.venv/
+env/
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Ignore media files
+*.mp4
+*.wav
+*.mp3
+
+# Ignore build directories
+build/
+dist/
+
+# Ignore IDE specific files
+.idea/
+.vscode/
