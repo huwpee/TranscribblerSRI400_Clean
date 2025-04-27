@@ -1,45 +1,99 @@
-# README.md
-
-TranscribblerApp is a Windows command‑line tool that performs speech‑to‑text transcription using OpenAI’s Whisper and speaker diarisation with Pyannote. It ships as a single, standalone installer that bundles Python, Whisper, Pyannote, all necessary patches and hooks, plus the FFmpeg executable. End users need only run the installer—no additional dependency installation is required.
-
-Installation  
-Download `TranscribblerAppInstaller-1.0.0.exe` from the project’s GitHub Releases page and launch it with administrator privileges. By default, TranscribblerApp installs to  
-```
-C:\Program Files\TranscribblerApp
-```  
-The installer places `ffmpeg.exe` in a subfolder beneath the install directory, appends that folder to the system PATH, creates Start‑menu and desktop shortcuts, and then runs a final `--help` check to verify functionality.
-
-Hugging Face Access Token  
-Speaker diarisation relies on the `pyannote/speaker‑diarization` model, which requires licence acceptance on Hugging Face and a valid access token. Sign in at https://huggingface.co, go to Settings → Access Tokens, generate a new token with read scope, and copy the `hf_…` string.
-
-In PowerShell you can set this token for the current session by running  
 ```powershell
-$env:PYANNOTE_AUTH_TOKEN = "hf_your_generated_token"
-```  
-or make it permanent across sessions by running  
-```powershell
-setx PYANNOTE_AUTH_TOKEN "hf_your_generated_token"
-```  
-then closing and reopening PowerShell. As an alternative you may supply the token directly on the command line with the `--pyannote-token` flag.
+@"
+# TranscribblerApp - Audio Speaker Identification & Transcription
 
-Usage  
-Open PowerShell and invoke the application with your input WAV file, desired output CSV path, Whisper model name, compute device, and token. For example:  
+## REQUIRED SETUP STEPS
+
+### Step 1: Run PowerShell as Administrator
+
+1. Click the Windows Start button
+2. Type "PowerShell"
+3. Right-click on "Windows PowerShell" in the search results
+4. Select "Run as administrator"
+5. Click "Yes" when prompted by User Account Control
+
+### Step 2: Accept Model Terms on Hugging Face
+
+You MUST accept the terms for BOTH of these models:
+
+1. Visit [pyannote/speaker-diarization](https://huggingface.co/pyannote/speaker-diarization)
+   - Click the blue "Access repository" button
+   - Log in if prompted
+   - Check "I accept the terms and conditions"
+   - Click "Accept"
+
+2. Visit [pyannote/segmentation](https://huggingface.co/pyannote/segmentation)
+   - Click the blue "Access repository" button
+   - Log in if prompted
+   - Check "I accept the terms and conditions"
+   - Click "Accept"
+
+### Step 3: Get Your Hugging Face Token
+
+1. Visit [Hugging Face Tokens Page](https://huggingface.co/settings/tokens)
+2. Click "New token"
+3. Name it "TranscribblerApp"
+4. Select "Read" role
+5. Click "Generate a token"
+6. Copy the token (looks like "hf_xxxxxxxxxxxxxxxxxxxxxxxxx")
+
+### Step 4: Install FFmpeg
+
+1. Download FFmpeg from [gyan.dev](https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-full.zip)
+2. Extract the ZIP file to C:\\ffmpeg
+3. Copy these files from C:\\ffmpeg\\bin:
+   - ffmpeg.exe
+   - ffprobe.exe
+4. Paste them into C:\\Program Files (x86)\\TranscribblerApp
+
+## RUNNING THE APPLICATION
+
+Copy and paste these commands into your Administrator PowerShell window:
+
 ```powershell
-& "C:\Program Files\TranscribblerApp\TranscribblerApp.exe" `
-  --input "C:\path\to\input.wav" `
-  --output "C:\path\to\output.csv" `
+# Disable symlinks to avoid permission issues
+$env:HF_HUB_DISABLE_SYMLINKS = "1"
+
+# Set your Hugging Face token (replace with your actual token)
+$env:PYANNOTE_AUTH_TOKEN = "YOUR_TOKEN_HERE"
+
+# Run TranscribblerApp
+& "C:\Program Files (x86)\TranscribblerApp\TranscribblerApp.exe" `
+  --input "C:\Users\YOUR_USERNAME\Desktop\input.wav" `
+  --output "C:\Users\YOUR_USERNAME\Desktop\output.csv" `
   --whisper-model base.en `
   --device cpu `
   --pyannote-token $env:PYANNOTE_AUTH_TOKEN
-```  
-This command transcribes the audio, assigns speaker labels to each segment, and writes a timestamped CSV with columns for start time, end time, speaker label and transcript text. On first run the diarisation model downloads to your user cache; subsequent runs reuse the local cache without requiring network access.
+```
 
-Troubleshooting  
-If you see a “401 Unauthorized” error during diarisation, confirm that you have accepted the model licence on Hugging Face and that your `PYANNOTE_AUTH_TOKEN` environment variable is set correctly. If FFmpeg cannot be found, run  
-```powershell
-ffmpeg -version
-```  
-in PowerShell to verify that the installer appended the FFmpeg subfolder to your PATH. If it fails, you may need to adjust your PATH manually or install FFmpeg separately.
+Replace:
+- "YOUR_TOKEN_HERE" with your Hugging Face token
+- "YOUR_USERNAME" with your Windows username
+- The input path with the path to your audio file
+- The output path with where you want the results saved
 
-Support  
-For bug reports, feature requests or documentation updates, open an issue on the TranscribblerApp GitHub repository. Contributions are welcome under the terms of the project licence.
+## TROUBLESHOOTING
+
+### "Could not download 'pyannote/speaker-diarization' pipeline"
+- You haven't accepted the terms for the speaker-diarization model
+- Visit https://huggingface.co/pyannote/speaker-diarization and accept the terms
+
+### "Could not download 'pyannote/segmentation' model"
+- You haven't accepted the terms for the segmentation model
+- Visit https://huggingface.co/pyannote/segmentation and accept the terms
+
+### "The system cannot find the file specified"
+- FFmpeg is not installed correctly
+- Make sure ffmpeg.exe and ffprobe.exe are in the TranscribblerApp folder
+
+### "OSError: [WinError 1314] A required privilege is not held by the client"
+- You're not running PowerShell as Administrator
+- Close PowerShell and follow Step 1 again
+
+### "Invalid header value"
+- Your token has extra spaces or newlines
+- Make sure to set it correctly: $env:PYANNOTE_AUTH_TOKEN = "YOUR_TOKEN_HERE"
+"@ | Out-File -FilePath README.md -Encoding utf8
+
+Write-Host "Created a simplified README.md with clear step-by-step instructions" -ForegroundColor Green
+```
